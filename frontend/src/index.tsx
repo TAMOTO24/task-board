@@ -1,6 +1,7 @@
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import BoardList from "./pages/home.tsx";
 import './index.css';
 
 const root = ReactDOM.createRoot(
@@ -9,7 +10,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <Router>
     <Routes>
-      <Route path="/" element={<div>Main Page</div>} />
+      <Route path="/" element={<BoardList />} />
     </Routes>
   </Router>
 );

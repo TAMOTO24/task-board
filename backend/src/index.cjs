@@ -11,6 +11,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
+app.use('/tasks', require('./routes.cjs'));
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
