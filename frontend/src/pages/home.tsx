@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Input, Space, Typography, message, Checkbox } from "antd";
+import { Input, Space, Typography, message, Checkbox, Select } from "antd";
 import { Task, Status } from "../components/types.ts";
 import TaskList from "../components/taskList.tsx";
 import CreateTaskModal from "../components/createTaskModal.tsx";
@@ -11,20 +11,34 @@ function BoardList() {
   const [boards, setBoards] = useState<Task[]>([]);
   const [ascendingFilter, setAscendingFilter] = useState<boolean>(false);
   const [descendingFilter, setDescendingFilter] = useState<boolean>(false);
+  const [selectedFilter, setSelectedFilter] = useState<string>("all");
 
-  const sortedBoards = [...boards].sort((a, b) => {
-    if (ascendingFilter) return a.priority - b.priority;
-    if (descendingFilter) return b.priority - a.priority;
-    return 0;
-  });
+  const [sortedBoards, setSortedBoards] = useState<Task[]>([]);
 
-  useEffect(() => {
+  useEffect(() => { // get initial board data
     const fetchBoards = async () => {
       const res = await axios.get("http://localhost:5000/tasks");
       setBoards(res.data);
+      setSortedBoards(res.data);
     };
     fetchBoards();
   }, []);
+
+  useEffect(() => { // update sorted boards when boards change
+    setSortedBoards(boards);
+    statusFilter(selectedFilter);
+  }, [boards]);
+
+  useEffect(() => { // update sorted boards when filters change
+    setSortedBoards(
+      [...boards].sort((a, b) => {
+        if (ascendingFilter) return a.priority - b.priority;
+        if (descendingFilter) return b.priority - a.priority;
+
+        return 0;
+      })
+    );
+  }, [ascendingFilter, descendingFilter, boards]);
 
   const handleDelete = async (id: string): Promise<void> => {
     await axios.delete(`http://localhost:5000/tasks/${id}`);
@@ -64,6 +78,12 @@ function BoardList() {
     setBoards((prevBoards) => [...prevBoards, newItem]);
   };
 
+  const statusFilter = (value: string) => {
+    setSelectedFilter(value);
+    if (value === "all") setSortedBoards([...boards]);
+    else setSortedBoards([...boards].filter((a) => a.status === value));
+  };
+
   return (
     <div style={{ padding: 24 }}>
       <Title level={2} style={{ textAlign: "center", marginBottom: 24 }}>
@@ -92,6 +112,16 @@ function BoardList() {
         >
           Descending priority filter
         </Checkbox>
+        <Select
+          defaultValue="All"
+          style={{ width: 120 }}
+          onChange={(value) => statusFilter(value)}
+          options={[
+            { value: "all", label: "All" },
+            { value: "done", label: "Done" },
+            { value: "undone", label: "Undone" },
+          ]}
+        />
       </Space>
 
       <TaskList
