@@ -66,8 +66,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ updateBoard }) => {
             rules={[{ required: true, message: "Please set priority" }]}
           >
             <Select
-              value={String(1)}
-              style={{ width: 80 }}
+              defaultValue={String(1)}
               options={Array.from({ length: 10 }, (_, i) => ({
                 value: String(i + 1),
                 label: String(i + 1),

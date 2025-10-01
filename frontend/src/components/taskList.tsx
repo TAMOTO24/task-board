@@ -18,15 +18,13 @@ const TaskList: React.FC<TaskProps> = ({
     <Row gutter={[16, 16]}>
       <List
         bordered
-        style={{ width: "100%" }}
+        className="w-full"
         dataSource={task}
         renderItem={(item) => (
-          <List.Item key={item?._id}>
+          <List.Item key={item?._id} className="p-4">
             <List.Item.Meta
               title={
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
-                >
+                <div className="flex items-center gap-2">
                   <Checkbox
                     checked={item.status === "done"}
                     onClick={() =>
@@ -36,25 +34,27 @@ const TaskList: React.FC<TaskProps> = ({
                       )
                     }
                   />
-                  <h2 style={{ margin: 0 }}>{item.title}</h2>
+                  <h2 className="m-0 text-lg font-semibold">{item.title}</h2>
                 </div>
               }
               description={
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <div style={{ flex: 1, display: "flex", gap: "50px" }}>
-                    <p>{item.description}</p>
-                    <p>
+                <div className="flex flex-col md:flex-row justify-between gap-6">
+                  <div className="flex-1 flex flex-col md:flex-row justify-between gap-12">
+                    <p className="text-gray-700">{item.description}</p>
+                    <p className="flex items-center gap-1 text-sm">
                       Status:{" "}
-                      <Tag color={item.status === "done" ? "green" : "volcano"}>
+                      <Tag
+                        color={item.status === "done" ? "green" : "volcano"}
+                      >
                         {item.status}
                       </Tag>
                     </p>
                   </div>
 
-                  <div>
+                  <div className="flex items-center gap-2">
                     <Select
                       value={String(item.priority)}
-                      style={{ width: 80 }}
+                      className="w-20"
                       onChange={(value) =>
                         onChangePriority(item._id, Number(value))
                       }
@@ -63,11 +63,9 @@ const TaskList: React.FC<TaskProps> = ({
                         label: String(i + 1),
                       }))}
                     />
-
                     <Button
                       danger
                       onClick={() => onDelete(item._id)}
-                      style={{ marginLeft: 8 }}
                     >
                       Delete
                     </Button>

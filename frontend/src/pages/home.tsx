@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Input, Space, Typography, message, Checkbox, Select } from "antd";
+import { Input, Typography, message, Checkbox, Select } from "antd";
 import { Task, Status } from "../components/types.ts";
 import TaskList from "../components/taskList.tsx";
+import '../index.css';
 import CreateTaskModal from "../components/createTaskModal.tsx";
 
 const { Title } = Typography;
@@ -13,11 +14,9 @@ function BoardList() {
   const [descendingFilter, setDescendingFilter] = useState<boolean>(false);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState<string>("");
-
   const [sortedBoards, setSortedBoards] = useState<Task[]>([]);
 
   useEffect(() => {
-    // get initial board data
     const fetchBoards = async () => {
       const res = await axios.get("http://localhost:5000/tasks");
       setBoards(res.data);
@@ -45,9 +44,9 @@ function BoardList() {
     setSortedBoards(filtered);
   }, [boards, selectedFilter, searchTerm, ascendingFilter, descendingFilter]);
 
-  const handleDelete = async (id: string): Promise<void> => {
+  const handleDelete = async (id: string) => {
     await axios.delete(`http://localhost:5000/tasks/${id}`);
-    setBoards(boards.filter((board: Task) => board._id !== id));
+    setBoards(boards.filter((board) => board._id !== id));
   };
 
   const handleChangePriority = async (id: string, newPriority: number) => {
@@ -57,10 +56,8 @@ function BoardList() {
           b._id === id ? { ...b, priority: newPriority } : b
         )
       );
-      await axios.put(`http://localhost:5000/tasks/${id}`, {
-        priority: newPriority,
-      });
-    } catch (err) {
+      await axios.put(`http://localhost:5000/tasks/${id}`, { priority: newPriority });
+    } catch {
       message.error("Failed to update priority");
     }
   };
@@ -70,11 +67,8 @@ function BoardList() {
       setBoards((prevBoards) =>
         prevBoards.map((b) => (b._id === id ? { ...b, status: newStatus } : b))
       );
-      await axios.put(`http://localhost:5000/tasks/${id}`, {
-        status: newStatus,
-      });
-    } catch (err) {
-      console.error("Failed to update status", err);
+      await axios.put(`http://localhost:5000/tasks/${id}`, { status: newStatus });
+    } catch {
       message.error("Failed to update status");
     }
   };
@@ -83,55 +77,47 @@ function BoardList() {
     setBoards((prevBoards) => [...prevBoards, newItem]);
   };
 
-  const statusFilter = (value: string) => {
-    setSelectedFilter(value);
-
-    if (value === "all")
-      setSortedBoards([...boards]);
-    else 
-      setSortedBoards([...boards].filter((a) => a.status === value));
-  };
-
-  const search = (value: string) => {
-    setSortedBoards([...boards].filter((str) => str.title.includes(value)));
-    setSearchTerm(value);
-  };
+  const statusFilter = (value: string) => setSelectedFilter(value);
+  const search = (value: string) => setSearchTerm(value);
 
   return (
-    <div style={{ padding: 24 }}>
-      <Title level={2} style={{ textAlign: "center", marginBottom: 24 }}>
-        Task Boards
-      </Title>
+    <div className="p-6">
+      <Title level={2} className="text-center mb-6">Task Boards</Title>
 
-      <Space style={{ marginBottom: 24 }}>
+      <div className="flex flex-wrap items-center gap-4 mb-6">
         <CreateTaskModal updateBoard={updateBoard} />
+
         <Input
           placeholder="Search..."
-          style={{ width: 200 }}
+          className="w-52"
           onChange={(e) => search(e.target.value)}
         />
-        <Checkbox
-          checked={ascendingFilter}
-          onChange={(e) => {
-            setAscendingFilter(e.target.checked);
-            if (e.target.checked) setDescendingFilter(false);
-          }}
-        >
-          Ascending priority filter
-        </Checkbox>
 
-        <Checkbox
-          checked={descendingFilter}
-          onChange={(e) => {
-            setDescendingFilter(e.target.checked);
-            if (e.target.checked) setAscendingFilter(false);
-          }}
-        >
-          Descending priority filter
-        </Checkbox>
+        <div className="flex items-center gap-4">
+          <Checkbox
+            checked={ascendingFilter}
+            onChange={(e) => {
+              setAscendingFilter(e.target.checked);
+              if (e.target.checked) setDescendingFilter(false);
+            }}
+          >
+            Ascending
+          </Checkbox>
+
+          <Checkbox
+            checked={descendingFilter}
+            onChange={(e) => {
+              setDescendingFilter(e.target.checked);
+              if (e.target.checked) setAscendingFilter(false);
+            }}
+          >
+            Descending
+          </Checkbox>
+        </div>
+
         <Select
-          defaultValue="All"
-          style={{ width: 120 }}
+          defaultValue="all"
+          className="w-32"
           onChange={(value) => statusFilter(value)}
           options={[
             { value: "all", label: "All" },
@@ -139,7 +125,7 @@ function BoardList() {
             { value: "undone", label: "Undone" },
           ]}
         />
-      </Space>
+      </div>
 
       <TaskList
         task={sortedBoards}
