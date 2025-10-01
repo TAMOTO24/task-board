@@ -13,7 +13,7 @@ const createTask = async (req, res) => {
   const { title, description, priority } = req.body;
 
   try {
-    const newTask = new Tasks({ title, description, priority });
+    const newTask = new Tasks({ title, description, status: "undone", priority });
     await newTask.save();
     res.status(201).json(newTask);
   } catch (error) {

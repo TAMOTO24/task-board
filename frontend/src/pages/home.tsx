@@ -12,10 +12,12 @@ function BoardList() {
   const [ascendingFilter, setAscendingFilter] = useState<boolean>(false);
   const [descendingFilter, setDescendingFilter] = useState<boolean>(false);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const [sortedBoards, setSortedBoards] = useState<Task[]>([]);
 
-  useEffect(() => { // get initial board data
+  useEffect(() => {
+    // get initial board data
     const fetchBoards = async () => {
       const res = await axios.get("http://localhost:5000/tasks");
       setBoards(res.data);
@@ -24,21 +26,24 @@ function BoardList() {
     fetchBoards();
   }, []);
 
-  useEffect(() => { // update sorted boards when boards change
-    setSortedBoards(boards);
-    statusFilter(selectedFilter);
-  }, [boards]);
+  useEffect(() => {
+    let filtered = [...boards];
 
-  useEffect(() => { // update sorted boards when filters change
-    setSortedBoards(
-      [...boards].sort((a, b) => {
-        if (ascendingFilter) return a.priority - b.priority;
-        if (descendingFilter) return b.priority - a.priority;
+    if (selectedFilter !== "all") {
+      filtered = filtered.filter((b) => b.status === selectedFilter);
+    }
 
-        return 0;
-      })
-    );
-  }, [ascendingFilter, descendingFilter, boards]);
+    if (searchTerm) {
+      filtered = filtered.filter((b) =>
+        b.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (ascendingFilter) filtered.sort((a, b) => a.priority - b.priority);
+    if (descendingFilter) filtered.sort((a, b) => b.priority - a.priority);
+
+    setSortedBoards(filtered);
+  }, [boards, selectedFilter, searchTerm, ascendingFilter, descendingFilter]);
 
   const handleDelete = async (id: string): Promise<void> => {
     await axios.delete(`http://localhost:5000/tasks/${id}`);
@@ -80,8 +85,16 @@ function BoardList() {
 
   const statusFilter = (value: string) => {
     setSelectedFilter(value);
-    if (value === "all") setSortedBoards([...boards]);
-    else setSortedBoards([...boards].filter((a) => a.status === value));
+
+    if (value === "all")
+      setSortedBoards([...boards]);
+    else 
+      setSortedBoards([...boards].filter((a) => a.status === value));
+  };
+
+  const search = (value: string) => {
+    setSortedBoards([...boards].filter((str) => str.title.includes(value)));
+    setSearchTerm(value);
   };
 
   return (
@@ -92,7 +105,11 @@ function BoardList() {
 
       <Space style={{ marginBottom: 24 }}>
         <CreateTaskModal updateBoard={updateBoard} />
-        <Input placeholder="Search..." style={{ width: 200 }} />
+        <Input
+          placeholder="Search..."
+          style={{ width: 200 }}
+          onChange={(e) => search(e.target.value)}
+        />
         <Checkbox
           checked={ascendingFilter}
           onChange={(e) => {

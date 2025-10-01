@@ -4,8 +4,6 @@ import axios from "axios";
 import { Task } from "./types";
 import { PlusOutlined } from "@ant-design/icons";
 
-const { Option } = Select;
-
 interface CreateTaskModalProps {
   updateBoard: (newItem: Task) => void;
 }
@@ -21,10 +19,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ updateBoard }) => {
     console.log("Form values:", values);
     setIsModalOpen(false);
     try {
-      values.status = "undone";
-      await axios.post("http://localhost:5000/tasks", values);
+      const res = await axios.post("http://localhost:5000/tasks", values);
       message.success("Task created successfully");
-      updateBoard(values);
+      updateBoard(res.data);
     } catch (err) {
       console.error("Failed to create task", err);
       message.error("Failed to create task");
